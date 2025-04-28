@@ -1,21 +1,18 @@
 const express = require("express");
-// const { adminAuth } = require("./middlewares/auth");
 const { connectDB } = require("./config/database");
-const User = require("./models/user");
+const cookieParser = require("cookie-parser");
 const app = express();
 
-app.use(express.json()); //ExpressJSON() middleware parse incoming JSON request bodies 
+app.use(express.json()); //ExpressJSON() middleware parse incoming JSON request bodies
+app.use(cookieParser()); // Middleware for parsing Cookie
 
-app.post("/signup", async (req, res, next) => {
-  const user = new User(req.body); // getting user from request body
-  try {
-//   validate request
-  await user.save();
-  res.send("user added successfully...")
-  } catch (err) {
-    res.status(400).send("Error saving user..."+ err.message);
-  }
-});
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestsRouter = require("./routes/requests");
+
+app.use('/', authRouter);
+app.use('/', profileRouter);
+app.use('/', requestsRouter);
 
 connectDB()
   .then(() => {
@@ -25,5 +22,5 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.log("Database connection failed...");
+    console.log("Database connection failed..."+ err.message);
   });
